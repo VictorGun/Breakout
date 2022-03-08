@@ -20,19 +20,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var score = 0
     var lives = 3
     var removedBricks = 0
+    
     override func didMove(to view: SKView) {
-        createBackground()
-        resetGame()
-        makePaddle()
-        makeLoseZone()
         physicsWorld.contactDelegate = self
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
+        createBackground()
+        resetGame()
+        makeLoseZone()
         makeLabels()
     }
     
     func resetGame() {
         // this stuff happens before each game starts
         makeBall()
+        makePaddle()
         makeBricks()
         updateLabels()
     }
@@ -113,15 +114,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     func didBegin(_ contact: SKPhysicsContact) {
         // ask each brick, "Is it you?"
+        // ask each brick, "Is it you?"
         for brick in bricks {
             if contact.bodyA.node == brick ||
                 contact.bodyB.node == brick {
                 score += 1
                 updateLabels()
-                brick.removeFromParent()
-                removedBricks += 1
-                if removedBricks == bricks.count {
-                    gameOver(winner: true)
+                if brick.color == .blue {
+                    brick.color = .orange   // blue bricks turn orange
+                }
+                else if brick.color == .orange {
+                    brick.color = .green    // orange bricks turn green
+                }
+                else {  // must be a green brick, which get removed
+                    brick.removeFromParent()
+                    removedBricks += 1
+                    if removedBricks == bricks.count {
+                        gameOver(winner: true)
+                    }
                 }
             }
         }
@@ -170,49 +180,52 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // now, figure the number and spacing of each row of bricks
         let count = Int(frame.width) / 55   // bricks per row
         let xOffset = (Int(frame.width) - (count * 55)) / 2 + Int(frame.minX) + 25
-        let y = Int(frame.maxY) - 15
-        for i in 0..<count {
-            let x = i * 55 + xOffset
-            makeBrick(x: x , y: y, color: .green)
+        let colors: [UIColor] = [.blue, .orange, .green]
+        for r in 0..<3 {
+            let y = Int(frame.maxY) - 15 - (r * 25)
+            for i in 0..<count {
+                let x = i * 55 + xOffset
+                makeBrick(x: x , y: y, color: colors[r])
+            }
         }
     }
-    
-    func makeLoseZone() {
-        loseZone = SKSpriteNode(color: .red, size: CGSize(width: frame.width, height: 50))
-        loseZone.position = CGPoint(x: frame.midX, y: frame.minY + 25)
-        loseZone.name = "loseZone"
-        loseZone.physicsBody = SKPhysicsBody(rectangleOf: loseZone.size)
-        loseZone.physicsBody?.isDynamic = false
-        addChild(loseZone)
-    }
-    func makeLabels() {
-        playLabel.fontSize = 24
-        playLabel.text = "Tap to start"
-        playLabel.fontName = "Arial"
-        playLabel.position = CGPoint(x: frame.midX, y: frame.midY - 50)
-        playLabel.name = "playLabel"
-        addChild(playLabel)
         
-        livesLabel.fontSize = 18
-        livesLabel.fontColor = .black
-        livesLabel.position = CGPoint(x: frame.minX + 50, y: frame.minY + 18)
-        addChild(livesLabel)
-        
-        scoreLabel.fontSize = 18
-        scoreLabel.fontColor = .black
-        scoreLabel.fontName = "Arial"
-        scoreLabel.position = CGPoint(x: frame.maxX - 50, y: frame.minY + 18)
-        addChild(scoreLabel)
-    }
-    func gameOver(winner: Bool) {
-        playingGame = false
-        playLabel.alpha = 1
-        resetGame()
-        if winner {
-            playLabel.text = "You win! Tap to play again"
+        func makeLoseZone() {
+            loseZone = SKSpriteNode(color: .red, size: CGSize(width: frame.width, height: 50))
+            loseZone.position = CGPoint(x: frame.midX, y: frame.minY + 25)
+            loseZone.name = "loseZone"
+            loseZone.physicsBody = SKPhysicsBody(rectangleOf: loseZone.size)
+            loseZone.physicsBody?.isDynamic = false
+            addChild(loseZone)
         }
-        else {
-            playLabel.text = "You lose! Tap to play again"
+        func makeLabels() {
+            playLabel.fontSize = 24
+            playLabel.text = "Tap to start"
+            playLabel.fontName = "Arial"
+            playLabel.position = CGPoint(x: frame.midX, y: frame.midY - 50)
+            playLabel.name = "playLabel"
+            addChild(playLabel)
+            
+            livesLabel.fontSize = 18
+            livesLabel.fontColor = .black
+            livesLabel.position = CGPoint(x: frame.minX + 50, y: frame.minY + 18)
+            addChild(livesLabel)
+            
+            scoreLabel.fontSize = 18
+            scoreLabel.fontColor = .black
+            scoreLabel.fontName = "Arial"
+            scoreLabel.position = CGPoint(x: frame.maxX - 50, y: frame.minY + 18)
+            addChild(scoreLabel)
+        }
+        func gameOver(winner: Bool) {
+            playingGame = false
+            playLabel.alpha = 1
+            resetGame()
+            if winner {
+                playLabel.text = "You win! Tap to play again"
+            }
+            else {
+                playLabel.text = "You lose! Tap to play again"
+            }
         }
     }
-}
