@@ -124,7 +124,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 // increase ball velocity by 2%
                 ball.physicsBody!.velocity.dx = ball.physicsBody!.velocity.dx * CGFloat(1.02)
                 ball.physicsBody!.velocity.dy = ball.physicsBody!.velocity.dy * CGFloat(1.02)
-                if brick.color == .blue {
+                if brick.color  == .red {
+                    brick.color = .blue
+                }
+                else if brick.color == .blue {
                     brick.color = .orange   // blue bricks turn orange
                 }
                 else if brick.color == .orange {
@@ -184,8 +187,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // now, figure the number and spacing of each row of bricks
         let count = Int(frame.width) / 55   // bricks per row
         let xOffset = (Int(frame.width) - (count * 55)) / 2 + Int(frame.minX) + 25
-        let colors: [UIColor] = [.blue, .orange, .green]
-        for r in 0..<3 {
+        let colors: [UIColor] = [.red, .blue, .orange, .green]
+        for r in 0..<4 {
             let y = Int(frame.maxY) - 15 - (r * 25)
             for i in 0..<count {
                 let x = i * 55 + xOffset
